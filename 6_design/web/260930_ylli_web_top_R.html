@@ -3,9 +3,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500&family=Noto+Sans+JP:wght@400;500&display=swap">
 <style>
-/* Layout: the symbol hangs like a garment on a hanger. Its six pattern pieces are stitched at the seams;
-   the visitor's scrolling and pointer move it, and it never comes to rest in the same place twice.
-   Below: the collection, quiet. Then a record of this visit's displacement, drawn by the crossing point.
+/* Layout: the symbol opens the page and is cut into pattern pieces as you scroll (sewn → cut → marker → joint).
+   Below: the collection, quiet. Then Record: the same symbol hangs, stitched at its seams, and sways with your
+   movement; its crossing point draws this visit's path over it. It never returns to the same shape.
    Colour follows B.2 — 素 / 玄 / 鈍 / 深青 only, 深青 once per surface. */
 :root{
   --so:#F5F3EF;   /* 素  ground */
@@ -31,12 +31,17 @@ a{color:inherit}
 .top nav a{font-family:var(--sans);font-size:11px;letter-spacing:.08em}
 .top nav svg{width:18px;height:18px;display:block}
 
-/* the hanging symbol */
-.hang{position:relative;height:170vh}
-.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;touch-action:pan-y}
+/* 01 — the scroll sequence: sewn → cut / displaced → marker → joint */
+.seq{position:relative;height:720vh}
+.stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
 .stage svg{position:absolute;inset:0;width:100%;height:100%;display:block}
-.read{position:absolute;left:24px;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);display:grid;grid-template-columns:auto auto auto;gap:2px 36px}
+.read{position:absolute;left:24px;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);display:grid;gap:2px}
 .read .d{font-family:var(--sans);font-size:22px;letter-spacing:.02em;font-variant-numeric:tabular-nums;line-height:1.2}
+.phase{position:absolute;right:24px;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);text-align:right;display:grid;gap:2px}
+.phase span{color:var(--nibi)}
+.phase span.on{color:var(--gen)}
+.rail{position:absolute;right:24px;top:84px;bottom:110px;width:1px;background:var(--nibi)}
+.rail i{position:absolute;left:0;top:0;width:1px;background:var(--gen);height:0}
 
 .wrap{padding-inline:24px;max-width:1360px;margin:0 auto}
 .shift{position:relative;display:block;margin:0;font-weight:500;line-height:1.02;letter-spacing:-.005em}
@@ -75,9 +80,10 @@ a{color:inherit}
 .chap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end;margin-bottom:40px}
 .chap .shift{font-size:clamp(56px,11vw,170px)}
 .chap .lb{color:var(--nibi)}
-.rec{position:relative;aspect-ratio:16/9;max-width:100%;border-top:1px solid var(--nibi)}
-.rec canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-.recread{display:grid;grid-template-columns:repeat(3,auto);justify-content:start;gap:2px 40px;margin-top:18px}
+.rec{position:relative;aspect-ratio:16/10;max-width:100%;border-top:1px solid var(--nibi);touch-action:pan-y}
+.rec svg,.rec canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.rec canvas{mix-blend-mode:difference;pointer-events:none}
+.recread{display:grid;grid-template-columns:repeat(5,auto);justify-content:start;gap:2px 40px;margin-top:18px}
 .recread .d{font-family:var(--sans);font-size:22px;font-variant-numeric:tabular-nums;line-height:1.2}
 .recread .lb{color:var(--nibi)}
 @media (max-width:640px){.rec{aspect-ratio:4/5}}
@@ -95,7 +101,7 @@ footer{background:var(--gen);color:var(--so)}
 footer .wrap{padding-block:100px 48px;display:flex;justify-content:space-between;align-items:flex-end;gap:16px}
 footer .sig{width:44px}
 footer .sig svg{display:block;width:100%;height:auto}
-@media (max-width:520px){.top{padding-inline:16px}.top nav{gap:12px}.top nav a.hide-s{display:none}.wrap{padding-inline:16px}.read{left:16px;gap:2px 20px}.read .d{font-size:18px}}
+@media (max-width:520px){.top{padding-inline:16px}.top nav{gap:12px}.top nav a.hide-s{display:none}.wrap{padding-inline:16px}.read{left:16px}.phase,.rail{right:16px}.recread{grid-template-columns:repeat(3,auto)}}
 @media (prefers-reduced-motion:reduce){.plate .dx,.spec .dxrow{transition:none}}
 </style>
 
@@ -110,12 +116,19 @@ footer .sig svg{display:block;width:100%;height:auto}
 </header>
 
 <main id="top">
-  <section class="hang" aria-label="Ylli symbol, hanging. Scrolling and moving the pointer displace its pieces.">
-    <div class="stage" id="stage">
+  <section class="seq" aria-label="Ylli symbol, cut into pattern pieces as you scroll">
+    <div class="stage">
       <svg id="st" role="img" aria-label="Ylli symbol"></svg>
+      <div class="rail" aria-hidden="true"><i id="railv"></i></div>
       <div class="read" aria-hidden="true">
-        <span class="lb">Δ now</span><span class="lb">Seams</span><span class="lb">Σ this visit</span>
-        <span class="d" id="r-d">0.0 mm</span><span class="d" id="r-s">8 / 8</span><span class="d" id="r-t">0.00 m</span>
+        <span class="lb">Δ max displacement　1 unit = 1 mm</span>
+        <span class="d" id="delta">0.0 mm</span>
+      </div>
+      <div class="phase lb" aria-hidden="true">
+        <span id="ph0" class="on">01　Sewn</span>
+        <span id="ph1">02　Cut / displaced</span>
+        <span id="ph2">03　Marker</span>
+        <span id="ph3">04　Joint</span>
       </div>
     </div>
   </section>
@@ -128,11 +141,14 @@ footer .sig svg{display:block;width:100%;height:auto}
   <div class="dark" id="record">
     <div class="wrap">
       <section aria-labelledby="h-rec">
-        <div class="chap"><h2 class="shift" id="h-rec">Record</h2><span class="lb">Path of the crossing point, this visit　／　× 3</span></div>
-        <div class="rec"><canvas id="rc" role="img" aria-label="Path of the crossing point of the symbol during this visit"></canvas></div>
+        <div class="chap"><h2 class="shift" id="h-rec">Record</h2><span class="lb">The symbol, hung and stitched　／　the path of its crossing point, this visit, × 4</span></div>
+        <div class="rec" id="rec">
+          <svg id="rs" role="img" aria-label="The symbol hanging. It moves with your scrolling and pointer."></svg>
+          <canvas id="rc" aria-hidden="true"></canvas>
+        </div>
         <div class="recread" aria-hidden="true">
-          <span class="lb">Σ distance</span><span class="lb">Time</span><span class="lb">Seams opened</span>
-          <span class="d" id="q-d">0.00 m</span><span class="d" id="q-t">00:00</span><span class="d" id="q-o">0</span>
+          <span class="lb">Δ now</span><span class="lb">Seams</span><span class="lb">Σ distance</span><span class="lb">Time</span><span class="lb">Seams opened</span>
+          <span class="d" id="q-n">0.0 mm</span><span class="d" id="q-s">8 / 8</span><span class="d" id="q-d">0.00 m</span><span class="d" id="q-t">00:00</span><span class="d" id="q-o">0</span>
         </div>
       </section>
     </div>
@@ -192,173 +208,301 @@ const rnd = (a, b) => a + Math.random() * (b - a);
   el('path', {d: D.word.d, fill: SO, transform: `translate(${(W-ww)/2} ${mh+90}) scale(.36)`}, sig);
 })();
 
-// ================= the hanging symbol =================
-// Six rigid pieces (A: the heavy path, B: the hairline path), stitched at the seams, the crossing tied,
-// the two top pieces hung from pins. Units are the symbol's own: 1 unit = 1 mm.
-const st = document.getElementById('st'), stage = document.getElementById('stage');
-const C = D.cross;
-const bodies = Object.entries(D.pieces).map(([id, p]) => {
-  const m = p.area / 100, I = p.I / 100;
-  const g = el('g', {}, null);
-  return {id, m, I, c: p.c, x: p.c[0], y: p.c[1], a: 0, vx: 0, vy: 0, va: 0, fx: 0, fy: 0, t: 0, d: p.d, g,
-          // per-visit character: how this piece answers to the visitor's movement
-          sx: rnd(-1, 1), sr: rnd(-1, 1), ph: rnd(0, 6.28)};
+(function(){
+// --- the sequence
+const st = document.getElementById('st');
+const IDS = ['A1','A2','A3','B1','B2','B3'];
+const P = D.pieces, C = D.cross;
+// drift direction per piece (fractions of view width / height) and rotation (deg) at full displacement
+const DRIFT = {A1:[-.30,-.02,-22], B1:[.31,.03,26], A2:[.13,.12,34], B2:[-.15,.16,-38], A3:[.24,.20,9], B3:[-.28,.10,-12]};
+// grain rotation on the marker: the diagonals turn to vertical
+const GRAIN = {A1:0, B1:0, A2:45, B2:-45, A3:0, B3:0};
+const ORDER = ['A3','B3','A2','B2','A1','B1'];
+const LABEL = {A1:'A-1',A2:'A-2',A3:'A-3',B1:'B-1',B2:'B-2',B3:'B-3'};
+
+const gFab = el('g', {}, st), gSeam = el('g', {}, st), gPieces = el('g', {}, st), gTop = el('g', {}, st);
+const fab = el('rect', {fill: 'none', stroke: NIBI, 'stroke-width': .5, 'vector-effect': 'non-scaling-stroke'}, gFab);
+const fabTxt = el('text', {fill: NIBI, 'font-family': 'Noto Sans JP, sans-serif', 'font-size': 3.2, 'letter-spacing': .3}, gFab); fabTxt.textContent = 'SELVEDGE';
+const grain = []; for (let i = 0; i < 6; i++) grain.push(el('path', {fill: 'none', stroke: NIBI, 'stroke-width': .5, 'vector-effect': 'non-scaling-stroke'}, gFab));
+const nodes = {};
+IDS.forEach(id => {
+  const g = el('g', {}, gPieces);
+  const path = el('path', {d: P[id].d, fill: INK}, g);
+  const t = el('text', {fill: INK, 'font-family': 'Noto Sans JP, sans-serif', 'font-size': 3.4, 'letter-spacing': .2}, g); t.textContent = LABEL[id];
+  nodes[id] = {g, path, t};
 });
-const B = Object.fromEntries(bodies.map(b => [b.id, b]));
-const springs = [];
-D.seams.forEach(([a, b, px, py]) => springs.push({a: B[a], b: B[b], pa: [px, py], pb: [px, py], k: 2200, c: 22, seam: true, open: 0}));
-springs.push({a: B.A2, b: B.B2, pa: C, pb: C, k: 900, c: 10, seam: false, open: 0});
-const pins = [{b: B.A1, p: [8.5, 0], at: [8.5, 0]}, {b: B.B1, p: [51.6, 0], at: [51.6, 0]}];
+const seams = D.seams.map(() => el('line', {stroke: INK, 'stroke-width': .6, 'stroke-dasharray': '2 1.6', 'vector-effect': 'non-scaling-stroke'}, gSeam));
+const crossLine = el('line', {stroke: INK, 'stroke-width': .6, 'stroke-dasharray': '2 1.6', 'vector-effect': 'non-scaling-stroke'}, gSeam);
+const ring = el('circle', {r: 9, fill: 'none', stroke: SHIN, 'stroke-width': 1.2, 'vector-effect': 'non-scaling-stroke', opacity: 0}, gTop);
 
-const gSeam = el('g', {}, st), gPieces = el('g', {}, st);
-bodies.forEach(b => { gPieces.appendChild(b.g); el('path', {d: b.d, fill: INK}, b.g); });
-const stitch = springs.map(s => el('line', {stroke: INK, 'stroke-width': .7, 'stroke-dasharray': '2 1.6', 'vector-effect': 'non-scaling-stroke', opacity: 0}, gSeam));
-const pinMarks = pins.map(p => el('line', {stroke: NIBI, 'stroke-width': .7, 'vector-effect': 'non-scaling-stroke'}, gSeam));
-
-function world(b, p) {
-  const cs = Math.cos(b.a), sn = Math.sin(b.a), rx = p[0] - b.c[0], ry = p[1] - b.c[1];
-  return [b.x + rx * cs - ry * sn, b.y + rx * sn + ry * cs, rx * cs - ry * sn, rx * sn + ry * cs];
-}
-function velAt(b, r) { return [b.vx - b.va * r[1], b.vy + b.va * r[0]]; }
-function force(b, r, fx, fy) { b.fx += fx; b.fy += fy; b.t += r[0] * fy - r[1] * fx; }
-
-let vb = {x: 0, y: 0, w: 1, h: 1, s: 1};
+let vb = {x: 0, y: 0, w: 1, h: 1};
 function layout() {
-  const r = stage.getBoundingClientRect(); const aspect = r.width / Math.max(1, r.height);
-  const h = D.h / .7, w = h * aspect;
-  vb = {x: C[0] - w / 2, y: -h * .06, w, h, s: r.height / h};
+  const r = st.getBoundingClientRect(); const aspect = r.width / Math.max(1, r.height);
+  const h = D.h / .74; const w = h * aspect;
+  vb = {x: C[0] - w / 2, y: -1, w, h};
   st.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
-  pins.forEach((p, i) => { pinMarks[i].setAttribute('x1', p.at[0]); pinMarks[i].setAttribute('x2', p.at[0]); pinMarks[i].setAttribute('y1', vb.y - 5); pinMarks[i].setAttribute('y2', p.at[1]); });
 }
-addEventListener('resize', layout); layout();
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const ease = t => t < .5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2;
+const lerp = (a, b, t) => a + (b - a) * t;
 
-const G = 60;                // gravity, units / s²
-let time = 0, opened = 0;
-function step(dt) {
-  time += dt;
-  bodies.forEach(b => {
-    b.fx = 0; b.fy = b.m * G; b.t = 0;
-    // air: a slow, never-repeating drift so the symbol is never still
-    if (!reduceMotion) {
-      const n = Math.sin(time * .7 + b.ph) + Math.sin(time * 1.31 + b.ph * 2.1) * .6 + Math.sin(time * 2.9 + b.ph * .7) * .25;
-      b.fx += n * b.m * 3.2;
-    }
-  });
-  springs.forEach(s => {
-    if (s.open > 0) { s.open -= dt; return; }
-    const A = world(s.a, s.pa), Bw = world(s.b, s.pb);
-    const dx = Bw[0] - A[0], dy = Bw[1] - A[1];
-    const va = velAt(s.a, [A[2], A[3]]), vbv = velAt(s.b, [Bw[2], Bw[3]]);
-    const fx = s.k * dx + s.c * (vbv[0] - va[0]), fy = s.k * dy + s.c * (vbv[1] - va[1]);
-    force(s.a, [A[2], A[3]], fx, fy); force(s.b, [Bw[2], Bw[3]], -fx, -fy);
-    // a seam pulled too far opens for a while, then is sewn again
-    if (s.seam && Math.hypot(dx, dy) > 46) { s.open = rnd(1.2, 3.2); opened++; }
-  });
-  pins.forEach(p => {
-    const W = world(p.b, p.p); const v = velAt(p.b, [W[2], W[3]]);
-    force(p.b, [W[2], W[3]], -9000 * (W[0] - p.at[0]) - 60 * v[0], -9000 * (W[1] - p.at[1]) - 60 * v[1]);
-  });
-  bodies.forEach(b => {
-    // a faint memory of the sewn shape, so the symbol is always found again, never exactly
-    b.fx += -2.5 * b.m * (b.x - b.c[0]); b.fy += -2.5 * b.m * (b.y - b.c[1]); b.t += -1.2 * b.I * Math.sin(b.a);
-    b.vx += b.fx / b.m * dt; b.vy += b.fy / b.m * dt; b.va += b.t / b.I * dt;
-    const damp = Math.exp(-1.1 * dt); b.vx *= damp; b.vy *= damp; b.va *= Math.exp(-1.6 * dt);
-    b.x += b.vx * dt; b.y += b.vy * dt; b.a += b.va * dt;
-  });
+function slot(id) {
+  // centroid position and rotation of each piece on the fabric marker
+  const fw = Math.min(vb.w * .86, 300), fx = C[0] - fw / 2, fy = 30, fh = 176;
+  const i = ORDER.indexOf(id);
+  const xs = [.09, .26, .45, .63, .80, .93];
+  return {x: fx + xs[i] * fw, y: fy + fh * .5 + (i > 3 ? -40 : 0), r: GRAIN[id], fab: {x: fx, y: fy, w: fw, h: fh}};
 }
 
-// the visitor's movement
-let lastScroll = scrollY, pointer = null;
-addEventListener('scroll', () => {
-  const dy = scrollY - lastScroll; lastScroll = scrollY;
-  if (reduceMotion) return;
-  const k = Math.max(-60, Math.min(60, dy));
-  bodies.forEach(b => { b.vx += k * 2.4 * b.sx; b.vy += k * .9; b.va += k * .018 * b.sr; });
-}, {passive: true});
-stage.addEventListener('pointermove', e => {
-  const r = stage.getBoundingClientRect();
-  const x = vb.x + (e.clientX - r.left) / r.width * vb.w, y = vb.y + (e.clientY - r.top) / r.height * vb.h;
-  if (pointer && !reduceMotion) {
-    const pvx = (x - pointer.x) / Math.max(.008, (e.timeStamp - pointer.t) / 1000), pvy = (y - pointer.y) / Math.max(.008, (e.timeStamp - pointer.t) / 1000);
-    bodies.forEach(b => {
-      const W = world(b, b.c); const d = Math.hypot(W[0] - x, W[1] - y);
-      const f = Math.max(0, 1 - d / 55);
-      if (f > 0) { b.vx += pvx * f * .08; b.vy += pvy * f * .08; b.va += (pvx * (W[1] - y) - pvy * (W[0] - x)) * f * .00004; }
-    });
+// transform of a piece as a function of scroll progress
+function pose(id, p, jit, i) {
+  const c = P[id].c;
+  let dx = 0, dy = 0, r = 0;
+  const e1 = Math.pow(clamp((p - .06) / .46), 1.9);            // 02 displaced
+  const [fx, fy, fr] = DRIFT[id];
+  const drift = {dx: fx * vb.w * e1, dy: fy * vb.h * e1, r: fr * e1};
+  const e2 = ease(clamp((p - .56) / .22));                      // 03 marker
+  const s = slot(id);
+  const mk = {dx: s.x - c[0], dy: s.y - c[1], r: s.r};
+  dx = lerp(drift.dx, mk.dx, e2); dy = lerp(drift.dy, mk.dy, e2); r = lerp(drift.r, mk.r, e2);
+  if (id === 'A2' || id === 'B2') {                             // 04 joint: the crossing goes back and closes
+    const e3 = ease(clamp((p - .82) / .14));
+    dx = lerp(dx, 0, e3); dy = lerp(dy, 0, e3); r = lerp(r, 0, e3);
   }
-  pointer = {x, y, t: e.timeStamp};
-});
-stage.addEventListener('pointerleave', () => { pointer = null; });
-
-// ================= record =================
-const rc = document.getElementById('rc'), rctx = rc.getContext('2d');
-const trace = []; let traceDist = 0, lastC = null;
-function sizeRecord() {
-  const r = rc.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
-  rc.width = Math.round(r.width * dpr); rc.height = Math.round(r.height * dpr); rctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  redraw();
+  const k = (1 - e2) * clamp(p / .06);                          // the viewer's speed shakes the pieces before the marker
+  dx += jit * k * Math.sin(i * 2.1 + 1) ; dy += jit * k * Math.cos(i * 1.7);
+  return {dx, dy, r, c};
 }
-function toRec(p) { const r = rc.getBoundingClientRect(); return [r.width / 2 + (p[0] - C[0]) * 3, r.height * .42 + (p[1] - C[1]) * 3]; }
-function redraw() {
-  const r = rc.getBoundingClientRect(); rctx.clearRect(0, 0, r.width, r.height);
-  rctx.strokeStyle = NIBI; rctx.lineWidth = 1; rctx.beginPath();
-  const o = toRec(C); rctx.moveTo(o[0] - 8, o[1]); rctx.lineTo(o[0] + 8, o[1]); rctx.moveTo(o[0], o[1] - 8); rctx.lineTo(o[0], o[1] + 8); rctx.stroke();
-  rctx.strokeStyle = SO; rctx.lineWidth = .7; rctx.globalAlpha = .9; rctx.beginPath();
-  trace.forEach((p, i) => { const q = toRec(p); i ? rctx.lineTo(q[0], q[1]) : rctx.moveTo(q[0], q[1]); }); rctx.stroke(); rctx.globalAlpha = 1;
+const apply = (q, x, y) => {
+  const a = q.r * Math.PI / 180, cs = Math.cos(a), sn = Math.sin(a);
+  const ux = x - q.c[0], uy = y - q.c[1];
+  return [q.c[0] + q.dx + ux * cs - uy * sn, q.c[1] + q.dy + ux * sn + uy * cs];
+};
+
+const seq = document.querySelector('.seq');
+const railv = document.getElementById('railv'), delta = document.getElementById('delta');
+const phs = [0,1,2,3].map(i => document.getElementById('ph' + i));
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let lastY = scrollY, vel = 0, forced = null;
+const m = /^#p(\d{1,3})$/.exec(location.hash); if (m) forced = +m[1] / 100;
+
+function progress() {
+  if (forced !== null) return forced;
+  const r = seq.getBoundingClientRect(); const span = r.height - innerHeight;
+  return clamp(-r.top / Math.max(1, span));
 }
-addEventListener('resize', sizeRecord); sizeRecord();
-
-// ================= band-cut heading: moved by the visitor's speed, not by position =================
-const SHIFTS = [...document.querySelectorAll('.shift')].map(h => {
-  const txt = h.textContent; h.textContent = '';
-  const src = document.createElement('span'); src.className = 'src'; src.textContent = txt; h.appendChild(src);
-  const cuts = [0, .18, .31, .47, .55, .72, .86, 1];
-  return cuts.slice(0, -1).map((a, i) => {
-    const b = document.createElement('span'); b.className = 'band'; b.setAttribute('aria-hidden', 'true'); b.textContent = txt;
-    b.style.clipPath = `inset(${a * 100}% 0 ${(1 - cuts[i + 1]) * 100}% 0)`; h.appendChild(b);
-    return {b, x: 0, v: 0, k: rnd(-1, 1)};
+function frame() {
+  const y = scrollY; vel = lerp(vel, Math.abs(y - lastY), .18); lastY = y;
+  const jit = reduce ? 0 : Math.min(vel * .09, 22);
+  const p = progress();
+  const poses = {};
+  let maxd = 0;
+  IDS.forEach((id, i) => {
+    const q = pose(id, p, jit, i); poses[id] = q;
+    nodes[id].g.setAttribute('transform', `translate(${q.dx + q.c[0]} ${q.dy + q.c[1]}) rotate(${q.r}) translate(${-q.c[0]} ${-q.c[1]})`);
+    maxd = Math.max(maxd, Math.hypot(q.dx, q.dy));
+    const b = P[id].b; nodes[id].t.setAttribute('x', b[2] + 2); nodes[id].t.setAttribute('y', b[1] + 4);
+    nodes[id].t.setAttribute('opacity', clamp((p - .1) / .08) * ((id === 'A2' || id === 'B2') ? 1 - clamp((p - .8) / .04) : 1));
   });
-}).flat();
-let lastY2 = scrollY;
-
-// ================= loop =================
-const rD = document.getElementById('r-d'), rS = document.getElementById('r-s'), rT = document.getElementById('r-t');
-const qD = document.getElementById('q-d'), qT = document.getElementById('q-t'), qO = document.getElementById('q-o');
-let prev = performance.now(), t0 = prev;
-function frame(now) {
-  const dtf = Math.max(0, Math.min(.05, (now - prev) / 1000)); prev = now;
-  const n = 16; for (let i = 0; i < n; i++) step(dtf / n);
-  let maxd = 0, intact = 0;
-  bodies.forEach(b => b.g.setAttribute('transform', `translate(${b.x} ${b.y}) rotate(${b.a * 57.2958}) translate(${-b.c[0]} ${-b.c[1]})`));
-  springs.forEach((s, i) => {
-    const A = world(s.a, s.pa), Bw = world(s.b, s.pb), d = Math.hypot(Bw[0] - A[0], Bw[1] - A[1]);
-    const L = stitch[i];
-    L.setAttribute('x1', A[0]); L.setAttribute('y1', A[1]); L.setAttribute('x2', Bw[0]); L.setAttribute('y2', Bw[1]);
-    if (s.open > 0) { L.setAttribute('stroke', NIBI); L.setAttribute('opacity', .6); }
-    else { L.setAttribute('stroke', INK); L.setAttribute('opacity', Math.min(1, Math.max(0, (d - .8) / 4))); }
-    if (s.seam) { maxd = Math.max(maxd, d); if (s.open <= 0) intact++; }
+  // seams: the same point on two pieces, stitched across the gap
+  const eJ = clamp((p - .84) / .1);
+  D.seams.forEach(([a, b, x, yy], k) => {
+    const pa = apply(poses[a], x, yy), pb = apply(poses[b], x, yy);
+    const L = seams[k]; L.setAttribute('x1', pa[0]); L.setAttribute('y1', pa[1]); L.setAttribute('x2', pb[0]); L.setAttribute('y2', pb[1]);
+    L.setAttribute('stroke', eJ > 0 ? NIBI : INK); L.setAttribute('opacity', clamp((p - .08) / .06) * (1 - .55 * eJ));
   });
-  rD.textContent = maxd.toFixed(1) + ' mm'; rS.textContent = intact + ' / 8';
-  // record the crossing point
-  const cp = world(B.A2, C);
-  if (!lastC || Math.hypot(cp[0] - lastC[0], cp[1] - lastC[1]) > .15) {
-    if (lastC) {
-      traceDist += Math.hypot(cp[0] - lastC[0], cp[1] - lastC[1]);
-      const a = toRec(lastC), b2 = toRec(cp);
-      rctx.strokeStyle = SO; rctx.lineWidth = .7; rctx.globalAlpha = .9; rctx.beginPath(); rctx.moveTo(a[0], a[1]); rctx.lineTo(b2[0], b2[1]); rctx.stroke(); rctx.globalAlpha = 1;
-    }
-    trace.push([cp[0], cp[1]]); if (trace.length > 40000) trace.shift();
-    lastC = [cp[0], cp[1]];
-  }
-  const meters = (traceDist / 1000).toFixed(2) + ' m';
-  rT.textContent = meters; qD.textContent = meters; qO.textContent = opened;
-  const sec = Math.floor((now - t0) / 1000); qT.textContent = String(Math.floor(sec / 60)).padStart(2, '0') + ':' + String(sec % 60).padStart(2, '0');
-  // heading bands
-  const dy = scrollY - lastY2; lastY2 = scrollY;
-  SHIFTS.forEach(s => { s.v += (reduceMotion ? 0 : dy * s.k * 1.6) - s.x * 90 * dtf - s.v * 7 * dtf; s.x += s.v * dtf * 6; s.b.style.transform = `translateX(${s.x.toFixed(1)}px)`; });
+  const ca = apply(poses.A2, C[0], C[1]), cb = apply(poses.B2, C[0], C[1]);
+  crossLine.setAttribute('x1', ca[0]); crossLine.setAttribute('y1', ca[1]); crossLine.setAttribute('x2', cb[0]); crossLine.setAttribute('y2', cb[1]);
+  crossLine.setAttribute('opacity', clamp((p - .08) / .06));
+  // fabric
+  const s = slot('A1'), f = s.fab, eF = ease(clamp((p - .56) / .2));
+  fab.setAttribute('x', f.x); fab.setAttribute('y', f.y); fab.setAttribute('width', f.w); fab.setAttribute('height', f.h);
+  gFab.setAttribute('opacity', eF * (1 - .5 * eJ));
+  fabTxt.setAttribute('x', f.x + 2); fabTxt.setAttribute('y', f.y - 2);
+  grain.forEach((g, i) => { const gx = f.x + f.w * (.05 + i * .18), gy = f.y + f.h - 26; g.setAttribute('d', `M${gx} ${gy} v20 M${gx-1.6} ${gy+3} L${gx} ${gy} L${gx+1.6} ${gy+3} M${gx-1.6} ${gy+17} L${gx} ${gy+20} L${gx+1.6} ${gy+17}`); });
+  // the rest of the pieces recede once the joint closes
+  IDS.forEach(id => { if (id !== 'A2' && id !== 'B2') nodes[id].path.setAttribute('fill', eJ > 0 ? mix(INK, NIBI, eJ) : INK); });
+  ring.setAttribute('cx', C[0]); ring.setAttribute('cy', C[1]); ring.setAttribute('opacity', eJ);
+  // readouts
+  railv.style.height = (p * 100) + '%';
+  delta.textContent = maxd.toFixed(1) + ' mm';
+  const ph = p < .06 ? 0 : p < .56 ? 1 : p < .82 ? 2 : 3;
+  phs.forEach((e, i) => e.classList.toggle('on', i === ph));
   requestAnimationFrame(frame);
 }
-requestAnimationFrame(frame);
+function mix(a, b, t) {
+  const h = s => [1, 3, 5].map(i => parseInt(s.slice(i, i + 2), 16));
+  const x = h(a), y = h(b); return 'rgb(' + x.map((v, i) => Math.round(v + (y[i] - v) * t)).join(',') + ')';
+}
+addEventListener('resize', layout); layout(); requestAnimationFrame(frame);
+addEventListener('hashchange', () => { const m = /^#p(\d{1,3})$/.exec(location.hash); forced = m ? +m[1] / 100 : null; });
+
+
+})();
+
+// ================= Record: the symbol, hung and stitched, and the path its crossing point draws =================
+// Six rigid pieces (A: the heavy path, B: the hairline path), stitched at the seams, the crossing tied,
+// the two top pieces hung from pins. Units are the symbol's own: 1 unit = 1 mm.
+(function(){
+  const rs = document.getElementById('rs'), rec = document.getElementById('rec');
+  const rc = document.getElementById('rc'), rctx = rc.getContext('2d');
+  const C = D.cross;
+  const bodies = Object.entries(D.pieces).map(([id, p]) => ({
+    id, m: p.area / 100, I: p.I / 100, c: p.c, x: p.c[0], y: p.c[1], a: 0, vx: 0, vy: 0, va: 0, fx: 0, fy: 0, t: 0, d: p.d,
+    g: el('g', {}, null),
+    // per-visit character: how this piece answers to the visitor's movement
+    sx: rnd(-1, 1), sr: rnd(-1, 1), ph: rnd(0, 6.28)
+  }));
+  const B = Object.fromEntries(bodies.map(b => [b.id, b]));
+  const springs = [];
+  D.seams.forEach(([a, b, px, py]) => springs.push({a: B[a], b: B[b], pa: [px, py], pb: [px, py], k: 3000, c: 30, seam: true, open: 0}));
+  springs.push({a: B.A2, b: B.B2, pa: C, pb: C, k: 1100, c: 14, seam: false, open: 0});
+  const pins = [{b: B.A1, p: [8.5, 0], at: [8.5, 0]}, {b: B.B1, p: [51.6, 0], at: [51.6, 0]}];
+
+  const gSeam = el('g', {}, rs), gPieces = el('g', {}, rs);
+  bodies.forEach(b => { gPieces.appendChild(b.g); el('path', {d: b.d, fill: SO}, b.g); });
+  const stitch = springs.map(() => el('line', {stroke: SO, 'stroke-width': .7, 'stroke-dasharray': '2 1.6', 'vector-effect': 'non-scaling-stroke', opacity: 0}, gSeam));
+  const pinMarks = pins.map(() => el('line', {stroke: NIBI, 'stroke-width': .7, 'vector-effect': 'non-scaling-stroke'}, gSeam));
+
+  const world = (b, p) => {
+    const cs = Math.cos(b.a), sn = Math.sin(b.a), rx = p[0] - b.c[0], ry = p[1] - b.c[1];
+    return [b.x + rx * cs - ry * sn, b.y + rx * sn + ry * cs, rx * cs - ry * sn, rx * sn + ry * cs];
+  };
+  const velAt = (b, r) => [b.vx - b.va * r[1], b.vy + b.va * r[0]];
+  const force = (b, r, fx, fy) => { b.fx += fx; b.fy += fy; b.t += r[0] * fy - r[1] * fx; };
+
+  // the symbol hangs from the top edge of the record; the trace is drawn in the same coordinates, over it
+  let vb = {x: 0, y: 0, w: 1, h: 1}, box = {w: 1, h: 1};
+  const trace = [];
+  function layout() {
+    const r = rec.getBoundingClientRect(); box = {w: r.width, h: r.height};
+    const h = D.h / .8, w = h * (r.width / Math.max(1, r.height));
+    vb = {x: C[0] - w / 2, y: -h * .08, w, h};
+    rs.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+    pins.forEach((p, i) => { const L = pinMarks[i]; L.setAttribute('x1', p.at[0]); L.setAttribute('x2', p.at[0]); L.setAttribute('y1', vb.y); L.setAttribute('y2', p.at[1]); });
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    rc.width = Math.round(r.width * dpr); rc.height = Math.round(r.height * dpr); rctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    redraw();
+  }
+  const MAG = 4;   // the path is drawn around the crossing, magnified
+  const toPx = p => { const x = C[0] + (p[0] - C[0]) * MAG, y = C[1] + (p[1] - C[1]) * MAG; return [(x - vb.x) / vb.w * box.w, (y - vb.y) / vb.h * box.h]; };
+  function redraw() {
+    rctx.clearRect(0, 0, box.w, box.h);
+    rctx.strokeStyle = SO; rctx.lineWidth = .8; rctx.lineJoin = 'round'; rctx.beginPath();
+    trace.forEach((p, i) => { const q = toPx(p); i ? rctx.lineTo(q[0], q[1]) : rctx.moveTo(q[0], q[1]); });
+    rctx.stroke();
+  }
+  addEventListener('resize', layout); layout();
+
+  const G = 60;
+  let time = 0, opened = 0;
+  function step(dt) {
+    time += dt;
+    bodies.forEach(b => {
+      b.fx = 0; b.fy = b.m * G; b.t = 0;
+      if (!reduceMotion) {   // air: a slow, never-repeating drift, small
+        const n = Math.sin(time * .5 + b.ph) + Math.sin(time * 1.13 + b.ph * 2.1) * .6 + Math.sin(time * 2.3 + b.ph * .7) * .25;
+        b.fx += n * b.m * 1.6;
+      }
+    });
+    springs.forEach(s => {
+      if (s.open > 0) { s.open -= dt; return; }
+      const A = world(s.a, s.pa), Bw = world(s.b, s.pb);
+      const dx = Bw[0] - A[0], dy = Bw[1] - A[1];
+      const va = velAt(s.a, [A[2], A[3]]), vbv = velAt(s.b, [Bw[2], Bw[3]]);
+      const fx = s.k * dx + s.c * (vbv[0] - va[0]), fy = s.k * dy + s.c * (vbv[1] - va[1]);
+      force(s.a, [A[2], A[3]], fx, fy); force(s.b, [Bw[2], Bw[3]], -fx, -fy);
+      if (s.seam && Math.hypot(dx, dy) > 40) { s.open = rnd(1, 2.4); opened++; }   // pulled too far: opens, then is sewn again
+    });
+    pins.forEach(p => {
+      const W = world(p.b, p.p), v = velAt(p.b, [W[2], W[3]]);
+      force(p.b, [W[2], W[3]], -9000 * (W[0] - p.at[0]) - 60 * v[0], -9000 * (W[1] - p.at[1]) - 60 * v[1]);
+    });
+    bodies.forEach(b => {
+      b.fx += -3 * b.m * (b.x - b.c[0]); b.fy += -3 * b.m * (b.y - b.c[1]); b.t += -1.6 * b.I * Math.sin(b.a);
+      b.vx += b.fx / b.m * dt; b.vy += b.fy / b.m * dt; b.va += b.t / b.I * dt;
+      const damp = Math.exp(-1.8 * dt); b.vx *= damp; b.vy *= damp; b.va *= Math.exp(-2.4 * dt);
+      b.x += b.vx * dt; b.y += b.vy * dt; b.a += b.va * dt;
+    });
+  }
+
+  // the visitor's movement: scrolling anywhere on the page, the pointer over the record
+  let lastScroll = scrollY, pointer = null;
+  addEventListener('scroll', () => {
+    const dy = scrollY - lastScroll; lastScroll = scrollY;
+    if (reduceMotion) return;
+    const k = Math.max(-40, Math.min(40, dy));
+    bodies.forEach(b => { b.vx += k * .55 * b.sx; b.vy += k * .2; b.va += k * .004 * b.sr; });
+  }, {passive: true});
+  rec.addEventListener('pointermove', e => {
+    const r = rec.getBoundingClientRect();
+    const x = vb.x + (e.clientX - r.left) / r.width * vb.w, y = vb.y + (e.clientY - r.top) / r.height * vb.h;
+    if (pointer && !reduceMotion) {
+      const dt = Math.max(.008, (e.timeStamp - pointer.t) / 1000);
+      const pvx = (x - pointer.x) / dt, pvy = (y - pointer.y) / dt;
+      bodies.forEach(b => {
+        const W = world(b, b.c), f = Math.max(0, 1 - Math.hypot(W[0] - x, W[1] - y) / 50);
+        if (f > 0) { b.vx += pvx * f * .035; b.vy += pvy * f * .035; }
+      });
+    }
+    pointer = {x, y, t: e.timeStamp};
+  });
+  rec.addEventListener('pointerleave', () => { pointer = null; });
+
+  const qN = document.getElementById('q-n'), qS = document.getElementById('q-s'), qD = document.getElementById('q-d'), qT = document.getElementById('q-t'), qO = document.getElementById('q-o');
+  let prev = performance.now(); const t0 = prev; let dist = 0, lastC = null;
+  function frame(now) {
+    const dtf = Math.max(0, Math.min(.05, (now - prev) / 1000)); prev = now;
+    for (let i = 0; i < 16; i++) step(dtf / 16);
+    bodies.forEach(b => b.g.setAttribute('transform', `translate(${b.x} ${b.y}) rotate(${b.a * 57.2958}) translate(${-b.c[0]} ${-b.c[1]})`));
+    let maxd = 0, intact = 0;
+    springs.forEach((s, i) => {
+      const A = world(s.a, s.pa), Bw = world(s.b, s.pb), d = Math.hypot(Bw[0] - A[0], Bw[1] - A[1]), L = stitch[i];
+      L.setAttribute('x1', A[0]); L.setAttribute('y1', A[1]); L.setAttribute('x2', Bw[0]); L.setAttribute('y2', Bw[1]);
+      if (s.open > 0) { L.setAttribute('stroke', NIBI); L.setAttribute('opacity', .7); }
+      else { L.setAttribute('stroke', SO); L.setAttribute('opacity', Math.min(1, Math.max(0, (d - .8) / 4))); }
+      if (s.seam) { maxd = Math.max(maxd, d); if (s.open <= 0) intact++; }
+    });
+    // the crossing point writes its path over the symbol, magnified around the crossing
+    const cp = world(B.A2, C);
+    if (!lastC || Math.hypot(cp[0] - lastC[0], cp[1] - lastC[1]) > .05) {
+      if (lastC) {
+        dist += Math.hypot(cp[0] - lastC[0], cp[1] - lastC[1]);
+        const a = toPx(lastC), b2 = toPx(cp);
+        rctx.strokeStyle = SO; rctx.lineWidth = .8; rctx.beginPath(); rctx.moveTo(a[0], a[1]); rctx.lineTo(b2[0], b2[1]); rctx.stroke();
+      }
+      trace.push([cp[0], cp[1]]); if (trace.length > 60000) trace.shift();
+      lastC = [cp[0], cp[1]];
+    }
+    qN.textContent = maxd.toFixed(1) + ' mm'; qS.textContent = intact + ' / 8'; qD.textContent = (dist / 1000).toFixed(2) + ' m'; qO.textContent = opened;
+    const sec = Math.floor((now - t0) / 1000); qT.textContent = String(Math.floor(sec / 60)).padStart(2, '0') + ':' + String(sec % 60).padStart(2, '0');
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+// ================= band-cut heading: moved by the visitor's speed, not by position =================
+(function(){
+  const bands = [...document.querySelectorAll('.shift')].map(h => {
+    const txt = h.textContent; h.textContent = '';
+    const src = document.createElement('span'); src.className = 'src'; src.textContent = txt; h.appendChild(src);
+    const cuts = [0, .18, .31, .47, .55, .72, .86, 1];
+    return cuts.slice(0, -1).map((a, i) => {
+      const b = document.createElement('span'); b.className = 'band'; b.setAttribute('aria-hidden', 'true'); b.textContent = txt;
+      b.style.clipPath = `inset(${a * 100}% 0 ${(1 - cuts[i + 1]) * 100}% 0)`; h.appendChild(b);
+      return {b, x: 0, v: 0, k: rnd(-1, 1)};
+    });
+  }).flat();
+  let lastY = scrollY, prev = performance.now();
+  function frame(now) {
+    const dt = Math.max(0, Math.min(.05, (now - prev) / 1000)); prev = now;
+    const dy = Math.max(-40, Math.min(40, scrollY - lastY)); lastY = scrollY;
+    bands.forEach(s => { s.v += (reduceMotion ? 0 : dy * s.k * 1.2) - s.x * 90 * dt - s.v * 8 * dt; s.x += s.v * dt * 6; s.b.style.transform = `translateX(${s.x.toFixed(1)}px)`; });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
 
 // --- Collection: quiet frames. A rectangle with one 45° cut corner; the displacement is drawn in ink and turns 深青 on touch.
 const FLATS = {
