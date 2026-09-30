@@ -37,9 +37,12 @@ python3 p3/make_pdfs.py                 # PDF にまとめる
 ```
 
 ## Web（ホームページ試作）
-- `web/pieces.py` — シンボルを型紙の6ピース（A-1〜3：太い線の経路、B-1〜3：細い線の経路）に切り分け、縫い目の点と交差の点を `web/pieces.json` に書き出す。
-- `web/template.html` — サイト本体。`web/build.py` で次の3つを埋め込むと、`6_design/web/260930_ylli_web_top_R.html` になる。
-  - `__SEQ__`：スクロールの仕掛け（`web/seq.js`）
-  - `__DATA__`：ピース、ワードマーク、アイコン（`web/data.json`）
-  - `__INC__`：INCIDENCE の画像（`web/inc.json`）
-- `#p0`〜`#p100` の URL ハッシュで、スクロール進行度を固定して確認できる。
+- `web/pieces.py` — シンボルを型紙の6ピースに切り分ける（A-1〜3：太い線の経路、B-1〜3：細い線の経路）。縫い目の点、交差の点、面積、慣性を `web/pieces.json` に書き出す。
+- `web/template.html` — サイト本体。`web/build3.py` で次の2つを埋め込むと、`6_design/web/260930_ylli_web_top_R.html` になる。
+  - `__DATA__`：`web/data.json`
+  - `__PLATES__`：`web/plates.js`（Collection の技術画）
+- **ロゴの物理の仕組み**
+  - 6ピースを剛体として扱い、縫い目8か所と交差1か所をばねでつなぐ。上の2ピースはピンで吊る。
+  - 重力と、ゆっくり揺れ続ける空気の力がかかる。
+  - スクロールと、ポインターの動きの速さが衝撃になる。
+  - 縫い目は引っぱられすぎると一時的に開き、また縫い直される。
