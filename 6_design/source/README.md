@@ -35,3 +35,8 @@ PYTHONPATH=. python3 bx/q01b.py         # ポスター
 PYTHONPATH=. python3 bx/xstory.py       # ストーリー
 python3 p3/make_pdfs.py                 # PDF にまとめる
 ```
+
+## Web（ホームページ試作）
+- `web/pieces.py` — シンボルを型紙の6ピース（A-1〜3：太い線の経路、B-1〜3：細い線の経路）に切り分け、縫い目の点と交差の点を `web/pieces.json` に書き出す。
+- `web/template.html` — サイト本体。`__DATA__` の位置に `web/data.json`（ピース、ワードマーク、アイコン）を埋め込むと、`6_design/web/260930_ylli_web_top_R.html` になる。
+- `#p0`〜`#p100` の URL ハッシュで、スクロール進行度を固定して確認できる。
